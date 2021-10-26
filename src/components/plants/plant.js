@@ -5,7 +5,7 @@ import './plant.css'
 function Plant(props) {
   return (
     <Card bg={props.theme} key={props.index}>
-      <Card.Img variant="top" src={`${process.env.PUBLIC_URL}/${props.details.plantImage}`} className="img-fluid" />
+      <Card.Img variant="top" src={`${process.env.PUBLIC_URL}/${props.details.plantImage}`} className="img-fluid"/>
       <Card.Body>
         <Card.Title>{props.details.nickName}</Card.Title>
         <Card.Subtitle>{props.details.realName}</Card.Subtitle>

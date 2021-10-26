@@ -25,10 +25,10 @@ function NavigationBar(props) {
                     <span className="navbar-toggler-icon" />
                 </button>
                 <Form inline>
-                    <Form.Check checked={themeSwitch === 'dark'} type="switch" id="darkmode-switch" label="Dark Mode" onChange={props.changeTheme} readonly/>
+                    <Form.Check checked={themeSwitch === 'dark'} type="switch" id="darkmode-switch" label="Dark Mode" onChange={props.changeTheme} readOnly/>
                 </Form>
             </Navbar>
-            <nav id="sideBar">
+            <nav id="sidebar">
                 <div>
                     Links and stuff will go in here
                 </div>
