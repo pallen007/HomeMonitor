@@ -1,10 +1,25 @@
 // import PropTypes from "prop-types";
+import React from 'react'
+import {Image, ScrollView, Text} from 'react-native';
 import { Card, ListGroupItem, ListGroup } from 'react-bootstrap';
 import './plant.css'
 
 function Plant(props) {
+
+
+  // Handlers
+  const handleEdits = (event) => {
+
+  }
+
+
+  // Actions
+
+
+
   return (
     <Card bg={props.theme} key={props.index}>
+      <Card.Header></Card.Header>
       <Card.Img variant="top" src={`${process.env.PUBLIC_URL}/${props.details.plantImage}`} className="img-fluid"/>
       <Card.Body>
         <Card.Title>{props.details.nickName}</Card.Title>
@@ -13,10 +28,11 @@ function Plant(props) {
       </Card.Body>
       <ListGroup>
         <ListGroupItem>
-          Current Moisture Level: {props.details.moistureLevel}
+          Current Moisture Level: {true && props.details.moistureLevel}
+          Ideal Moisture: {true && props.details.idealMoistureLevel}
         </ListGroupItem>
         <ListGroupItem>
-            Last watered {props.details.lastWatered}
+          Last watered {true && props.details.lastWatered}
         </ListGroupItem>
       </ListGroup>
     </Card>
@@ -29,6 +45,7 @@ function Plant(props) {
 //   nickName: String,
 //   realName: String,
 //   moistureLevel: Number,
+//   idealMoistureLevel: Number,
 //   lastWatered: Date,
 //   careInstructions: String,
 // };

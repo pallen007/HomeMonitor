@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
 import { ThemeContext } from "styled-components";
-import { lightTheme } from "../../theme/theme";
-import Plant from "../plant";
-import plantList from "../../../testData/plantsList.json";
+import { lightTheme } from "../../components/theme/theme";
+import Plant from "../../components/plant/plant";
+import plantList from "../../testData/plantsList.json";
 import CardGroup from 'react-bootstrap/CardGroup';
 
-const PlantsHome = () => {
+const PlantContainer = (props) => {
   const themeContext = useContext(ThemeContext);
   const themeSwitch = themeContext === lightTheme ? "light" : "dark";
 
@@ -19,4 +19,4 @@ const PlantsHome = () => {
     </div>
   );
 };
-export default PlantsHome;
+export default PlantContainer;
