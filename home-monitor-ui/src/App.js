@@ -1,7 +1,7 @@
 import React from 'react';
 import {BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import HomePage from './components/homepage/homepage';
-import PlantsHome from './components/plants/plants-home/plants-home';
+import PlantContainer from './containers/plant-container/plant-container';
 import './App.css';
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './components/theme/global'
@@ -30,7 +30,7 @@ function App() {
           <Route path="/plants" component={PlantsHome}/>
           <Route path="/home" component={HomePage}/>
         </Switch> */}
-        <PlantsHome />
+        <PlantContainer />
       {/* </BrowserRouter> */}
       
     </ThemeProvider>
