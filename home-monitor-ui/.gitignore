@@ -5,6 +5,9 @@
 /.pnp
 .pnp.js
 
+# variables
+credentials.json
+
 # testing
 /coverage
 

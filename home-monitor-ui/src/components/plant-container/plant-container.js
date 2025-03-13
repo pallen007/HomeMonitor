@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { ThemeContext } from "styled-components";
-import { lightTheme } from "../../components/theme/theme";
-import Plant from "../../components/plant/plant";
+import { lightTheme } from "../theme/theme";
+import Plant from "../plant/plant";
 import plantList from "../../testData/plantsList.json";
 import CardGroup from 'react-bootstrap/CardGroup';
 
