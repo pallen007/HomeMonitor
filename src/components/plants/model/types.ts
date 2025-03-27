@@ -21,6 +21,7 @@ export type SensorData = {
 
 export type PlantProps = {
   id: number
+  owned: boolean
   details: PlantDetails
   sensorData?: SensorData
 }

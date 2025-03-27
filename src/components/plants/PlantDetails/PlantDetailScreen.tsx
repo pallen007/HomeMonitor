@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { PlantDetails } from "../model/PlantDetails"
+import { PlantDetails } from "../model/types"
 import { Modal, Button, Form } from "react-bootstrap"
 import { detailSearch } from "../../../service/search/plant-search"
 
