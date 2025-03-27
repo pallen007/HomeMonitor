@@ -1,7 +1,7 @@
 import React from 'react';
-import {BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
-import HomePage from './components/homepage/homepage';
-import PlantContainer from './containers/plant-container/plant-container';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Homepage from './components/homepage/Homepage'
+import PlantContainer from './containers/plant-container/plant-container'
 import './App.css';
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './components/theme/global'
@@ -9,7 +9,7 @@ import { lightTheme, darkTheme } from './components/theme/theme';
 import { useDarkMode } from './components/theme/useDarkMode';
 import NavigationBar from './components/navigation/navbar';
 
-function App() {
+const App: React.FC = () => {
 	const [theme, toggleTheme, componentMounted] = useDarkMode();
   const themeMode = theme === 'light' ? lightTheme : darkTheme;
 
@@ -22,17 +22,16 @@ function App() {
 	return (
     <ThemeProvider theme = {themeMode}>
       <GlobalStyles />
-      {/* <BrowserRouter> */}
-        {/* <Loader /> */}
-        <NavigationBar theme={theme} changeTheme={toggleTheme}/>
-        {/* <Switch>
-          <Redirect exact from='/' to='plants'/>
-          <Route path="/plants" component={PlantsHome}/>
-          <Route path="/home" component={HomePage}/>
-        </Switch> */}
-        <PlantContainer />
-      {/* </BrowserRouter> */}
-      
+      <NavigationBar theme={theme} changeTheme={toggleTheme}/>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Homepage />} />
+          <Route path="/plants" element={<PlantContainer />} />
+          <Route path="/lookup" element={<Lookup />} />
+          <Route path="/guides" element={<Guides />} />
+        </Routes>
+      </Router>
+      <PlantContainer />
     </ThemeProvider>
 	);
 }

@@ -1,11 +1,11 @@
 import React from "react"
 // import { ThemeContext } from "styled-components"
 // import { lightTheme } from "../../theme/theme"
-import Plant from "../plant/plant"
+import Plant from "../Plant/Plant"
 import CardGroup from 'react-bootstrap/CardGroup' 
 import { getPlants, getSensorData } from "../../../service/db-ops/plant-ops"
 import { useEffect, useState } from "react"
-import { PlantDetails, PlantProps, SensorData } from "../model/PlantDetails"
+import { PlantDetails, PlantProps, SensorData } from "../model/types"
 
 const PlantContainer = async (idList: [number]) => {
   const [plants, setPlants] = useState<PlantProps[]>([])

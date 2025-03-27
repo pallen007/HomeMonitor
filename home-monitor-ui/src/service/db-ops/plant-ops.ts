@@ -1,4 +1,4 @@
-import { PlantDetails } from "../../components/plants/model/PlantDetails";
+import { PlantDetails } from "../../components/plants/model/types";
 
 export const updatePlant = async (id: number, plantDetails: PlantDetails) => {
     try {
