@@ -3,6 +3,7 @@ import { PlantDetails } from "../model/types"
 import { Modal, Button, Form } from "react-bootstrap"
 import { detailSearch } from "../../../service/search/plant-search"
 
+// TODO: Update this whole file for new type structure
 export const PlantDetailScreen = ({ plant }: { plant: PlantDetails }) => {
   const [showModal, setShowModal] = useState(false)
   const [editablePlant, setEditablePlant] = useState<PlantDetails>(plant)
@@ -25,7 +26,7 @@ export const PlantDetailScreen = ({ plant }: { plant: PlantDetails }) => {
 
   const handlePrefill = async () => {
     if (editablePlant.perenualId) {
-      const fetchedDetails = await detailSearch(editablePlant.perenualId)
+      const fetchedDetails = await detailSearch(editablePlant.perenualId, owned)
       setEditablePlant((prev) => ({
         ...prev,
         ...fetchedDetails,
