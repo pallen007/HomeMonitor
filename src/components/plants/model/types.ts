@@ -1,27 +1,30 @@
+import { PlantDetails } from "../../../service/utils/types"
 
 
-export type PlantDetails = {
-    plantId: number
-    perenualId?: number
+export type PreviewDetails = {
+    plantDescription?: string
     careInstructions?: string
     cycle?: string
-    idealMoistureLevel: number
     nickName?: string
     plantImage?: string
+    plantThumbnail?: string
     realName?: string
     wateringRate?: string
 }
 
 export type SensorData = {
     plantId: number
+    idealMoistureLevel: number
     moistureLevel?: number
     lastWatered?: string
     sensorError?: string
 }
 
 export type PlantProps = {
-  id: number
+  perenualId: number
   owned: boolean
-  details: PlantDetails
+  previewDetails: PreviewDetails
   sensorData?: SensorData
+  perenualDetails: PlantDetails
+
 }

@@ -24,3 +24,7 @@ credentials.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# local files
+setting.json
+/.github

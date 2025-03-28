@@ -11,7 +11,7 @@ export const updatePlant = async (id: number, plantDetails: PlantDetails) => {
         })
         return response.json()
     } catch (error) {
-        console.error("Error updating plant:", error);
+        console.error("Error updating plant:", error)
     }
 }
 
@@ -40,7 +40,7 @@ export const getPlants = async (idList: [number]) => {
         })
         return response.json()
     } catch (error) {
-        console.error("Error fetching plants:", error);
+        console.error("Error fetching plants:", error)
     }
 }
 
@@ -55,6 +55,6 @@ export const getSensorData = async (idList: [number]) => {
         })
         return response.json()
     } catch (error) {
-        console.error("Error fetching sensor data:", error);
+        console.error("Error fetching sensor data:", error)
     }
 }

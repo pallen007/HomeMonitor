@@ -1,14 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Button, Card, Row, Col } from 'react-bootstrap';
-import { plantSearch } from '../../../service/search/plant-search'; // Import the plant-search service
-import { SearchOptions } from '../../../service/utils/types'; // Import the SearchOptions type
+import React, { useState, useEffect } from 'react'
+import { Form, Button, Card, Row, Col } from 'react-bootstrap'
+import { plantSearch } from '../../../service/search/plant-search'
+import { SearchOptions } from '../../../service/utils/types'
+import { PlantProps } from '../model/types'
 
-interface Plant {
-    id: number;
-    name: string;
-    image: string;
-    description: string;
-}
 
 const PlantLookup: React.FC = () => {
     const [filters, setFilters] = useState<SearchOptions>({
@@ -23,32 +18,32 @@ const PlantLookup: React.FC = () => {
         indoor: null,
         hardiness: 1,
     });
-    const [plants, setPlants] = useState<Plant[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [plants, setPlants] = useState<PlantProps[]>([])
+    const [loading, setLoading] = useState<boolean>(false)
 
-    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
         setFilters((prevFilters) => ({
             ...prevFilters,
             [name]: value,
-        }));
-    };
+        }))
+    }
 
     const executeSearch = async () => {
         setLoading(true);
         try {
-            const results = await plantSearch(filters); // Call the plant-search service
-            setPlants(results);
+            const results: PlantProps[] = (await plantSearch(filters)) || []
+            setPlants(results)
         } catch (error) {
-            console.error('Error fetching plants:', error);
+            console.error('Error fetching plants:', error)
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
-    };
+    }
 
     useEffect(() => {
-        executeSearch(); // Execute search whenever filters change
-    }, [filters]);
+        executeSearch()
+    }, [filters])
 
     return (
         <div style={{ padding: '20px' }}>
@@ -67,6 +62,8 @@ const PlantLookup: React.FC = () => {
                             />
                         </Form.Group>
                     </Col>
+                    {/* 
+                    // TODO: update with actual filters and sorting logic
                     <Col>
                         <Form.Group>
                             <Form.Label>Order</Form.Label>
@@ -94,7 +91,7 @@ const PlantLookup: React.FC = () => {
                                 <option value="biannual">Biannual</option>
                             </Form.Select>
                         </Form.Group>
-                    </Col>
+                    </Col> */}
                 </Row>
                 <Button variant="primary" onClick={executeSearch} disabled={loading}>
                     {loading ? 'Searching...' : 'Search'}
@@ -105,12 +102,12 @@ const PlantLookup: React.FC = () => {
                 {plants.length === 0 && !loading && <p>No plants found.</p>}
                 <Row>
                     {plants.map((plant) => (
-                        <Col key={plant.id} md={4} style={{ marginBottom: '20px' }}>
+                        <Col key={plant.perenualId} md={4} style={{ marginBottom: '20px' }}>
                             <Card>
-                                <Card.Img variant="top" src={plant.image} alt={plant.name} />
+                                <Card.Img variant="top" src={plant.previewDetails?.plantImage} alt={plant.previewDetails?.realName} />
                                 <Card.Body>
-                                    <Card.Title>{plant.name}</Card.Title>
-                                    <Card.Text>{plant.description}</Card.Text>
+                                    <Card.Title>{plant.previewDetails.realName}</Card.Title>
+                                    <Card.Text>{plant.previewDetails.plantDescription}</Card.Text>
                                 </Card.Body>
                             </Card>
                         </Col>
@@ -121,4 +118,4 @@ const PlantLookup: React.FC = () => {
     );
 };
 
-export default PlantLookup;
+export default PlantLookup

@@ -17,24 +17,24 @@ const Plant: React.FC<PlantProps> = (
   return (
     <Card bg={themeSwitch}>
       <Card.Header></Card.Header>
-      {props.details?.plantImage && <Card.Img variant="top" src={`data:image/png;base64,${props.details?.plantImage}`} className="img-fluid"/>}
+      {props.previewDetails?.plantImage && <Card.Img variant="top" src={`${props.previewDetails?.plantImage}`} className="img-fluid"/>}
       <Card.Body>
-        {props.owned ? <Card.Title>{props.details.nickName}</Card.Title> : <Card.Title>{props.details.realName}</Card.Title> }
-        {props.owned && <Card.Subtitle>{props.details.realName}</Card.Subtitle> }
-        <Card.Text>Care: {props.details.careInstructions}</Card.Text>
+        {props.owned ? <Card.Title>{props.previewDetails.nickName}</Card.Title> : <Card.Title>{props.previewDetails.realName}</Card.Title> }
+        {props.owned && <Card.Subtitle>{props.previewDetails.realName}</Card.Subtitle> }
+        <Card.Text>Care: {props.previewDetails.careInstructions}</Card.Text>
       </Card.Body>
       <ListGroup>
-        {props.details?.cycle && <ListGroupItem>
-          Cycle: {props.details?.cycle}
+        {props.previewDetails?.cycle && <ListGroupItem>
+          Cycle: {props.previewDetails?.cycle}
         </ListGroupItem>
         }
         {props.owned && <ListGroupItem>
           Current Moisture Level: {props.sensorData?.moistureLevel}
         </ListGroupItem>}
-        <ListGroupItem>
-          Ideal Moisture: {props.details.idealMoistureLevel}
-        </ListGroupItem>
-        {props.owned && <ListGroupItem>
+        {props.sensorData && <ListGroupItem>
+          Ideal Moisture: {props.sensorData?.idealMoistureLevel}
+        </ListGroupItem>}
+        {props.sensorData && <ListGroupItem>
           Last watered {props.sensorData?.lastWatered}
         </ListGroupItem>}
       </ListGroup>
