@@ -1,7 +1,4 @@
-import { PlantDetails } from "../../../service/utils/types"
-
-
-export type PreviewDetails = {
+export interface LocalPlantDetails {
     plantDescription?: string
     careInstructions?: string
     cycle?: string
@@ -20,11 +17,3 @@ export type SensorData = {
     sensorError?: string
 }
 
-export type PlantProps = {
-  perenualId: number
-  owned: boolean
-  previewDetails: PreviewDetails
-  sensorData?: SensorData
-  perenualDetails: PlantDetails
-
-}

@@ -1,6 +1,6 @@
-import { PlantDetails, PlantSearchResult, SearchOptions } from "./types";
+import { PerenualPlantDetails, PlantSearchResult, SearchOptions } from "./types";
 import { perenualAPIKey } from "../../../assets/credentials.json"
-import { PreviewDetails, PlantProps } from "../../components/plants/model/types";
+import { LocalPlantDetails, PlantProps } from "../../Components/plants/Types/types";
 
 
 export const createListQueryParams = (searchOptions: SearchOptions) => {
@@ -61,22 +61,14 @@ export const searchResultsToPlantData = (results: PlantSearchResult[]) => {
         return {
             perenualId: result.id,
             owned: false,
-            previewDetails: {
+            isSearchResult: true,
+            localDetails: {
                 perenualId: result.id,
                 plantImage: result.default_image.regular_url,
                 plantThumbnail: result.default_image.thumbnail,
                 realName: result.common_name
-            },
-            perenualDetails: {} as PlantDetails
+            } as LocalPlantDetails,
+            perenualDetails: {} as PerenualPlantDetails
         } as PlantProps
     })
-}
-
-export const detailResultsToPlantData = (owned: boolean, results: PlantDetails) => {
-    return {
-        previewDetails: {} as PreviewDetails,
-        perenualId: results.id,
-        owned: owned,
-        perenualDetails: results as PlantDetails
-    } as PlantProps
 }

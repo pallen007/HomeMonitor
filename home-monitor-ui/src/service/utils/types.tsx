@@ -51,7 +51,7 @@ export type PlantSearchResult = {
     }
 }
 
-export type PlantDetails = {
+export type PerenualPlantDetails = {
     id: number
     common_name?: string
     scientific_name?: string[]

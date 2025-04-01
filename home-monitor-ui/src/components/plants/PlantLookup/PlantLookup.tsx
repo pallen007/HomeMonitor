@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Form, Button, Card, Row, Col } from 'react-bootstrap'
+import { Form, Button, Row, Col, CardGroup } from 'react-bootstrap'
 import { plantSearch } from '../../../service/search/plant-search'
 import { SearchOptions } from '../../../service/utils/types'
-import { PlantProps } from '../model/types'
+import Plant from '../plant/plant'
+import { PlantProps } from '../types/types'
 
 
 const PlantLookup: React.FC = () => {
@@ -100,19 +101,12 @@ const PlantLookup: React.FC = () => {
             <div style={{ marginTop: '20px' }}>
                 <h2>Results</h2>
                 {plants.length === 0 && !loading && <p>No plants found.</p>}
-                <Row>
+                <CardGroup style={{ display: 'flex', flexWrap: 'wrap' }}>
                     {plants.map((plant) => (
-                        <Col key={plant.perenualId} md={4} style={{ marginBottom: '20px' }}>
-                            <Card>
-                                <Card.Img variant="top" src={plant.previewDetails?.plantImage} alt={plant.previewDetails?.realName} />
-                                <Card.Body>
-                                    <Card.Title>{plant.previewDetails.realName}</Card.Title>
-                                    <Card.Text>{plant.previewDetails.plantDescription}</Card.Text>
-                                </Card.Body>
-                            </Card>
-                        </Col>
+                        <Plant {...plant} key={plant.perenualId} />
+                        
                     ))}
-                </Row>
+                </CardGroup>
             </div>
         </div>
     );

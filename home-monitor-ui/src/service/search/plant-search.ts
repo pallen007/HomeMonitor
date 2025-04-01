@@ -1,6 +1,6 @@
 
 import * as utils from '../utils/operations'
-import { SearchOptions } from '../utils/types'
+import { PerenualPlantDetails, SearchOptions } from '../utils/types'
 
 export const plantSearch = async (searchOptions: SearchOptions) => { 
 
@@ -19,7 +19,7 @@ export const plantSearch = async (searchOptions: SearchOptions) => {
     }
 }
 
-export const detailSearch = async (id: number, owned: boolean) => {
+export const detailSearch = async (id: number) => {
     const queryParams = utils.createDetailQueryParams(id)
     try {
         const response = await fetch(`https://perenual.com/api/v2/species/details/` + queryParams,
@@ -29,7 +29,7 @@ export const detailSearch = async (id: number, owned: boolean) => {
                     'Content-Type': 'application/json',
                 }
             })
-            return utils.detailResultsToPlantData(owned, await response.json())
+            return  await response.json() as PerenualPlantDetails
     } catch (error) {
         console.error("Error fetching data:", error)
     }
