@@ -1,12 +1,18 @@
 import React, { useState } from "react"
-import { PlantDetails } from "../model/types"
+// import { PerenualPlantDetails } from "../../../service/utils/types"
+import { FaEdit } from 'react-icons/fa';
 import { Modal, Button, Form } from "react-bootstrap"
 import { detailSearch } from "../../../service/search/plant-search"
+import { PlantContext } from "../../../App";
+import { PlantDetailsProps } from "./PlantDetailsProps";
 
 // TODO: Update this whole file for new type structure
-export const PlantDetailScreen = ({ plant }: { plant: PlantDetails }) => {
+export const PlantDetailScreen = ( plant: PlantDetailsProps ) => {
   const [showModal, setShowModal] = useState(false)
-  const [editablePlant, setEditablePlant] = useState<PlantDetails>(plant)
+  // TODO: This seems like an antipattern... Maybe make a new object and type?
+  const [editablePlant, setEditablePlant] = useState<PlantDetailsProps>(plant)
+
+  const context = React.useContext(PlantContext)
 
   const handleEditClick = () => {
     setShowModal(true)
@@ -24,9 +30,11 @@ export const PlantDetailScreen = ({ plant }: { plant: PlantDetails }) => {
     }))
   }
 
+  // TODO: update this file to pull up a search modal for prefill details, and ability to select a plant to copy details from
+  // TODO: May need to grab search status from the context
   const handlePrefill = async () => {
     if (editablePlant.perenualId) {
-      const fetchedDetails = await detailSearch(editablePlant.perenualId, owned)
+      const fetchedDetails = await detailSearch(editablePlant.perenualId)
       setEditablePlant((prev) => ({
         ...prev,
         ...fetchedDetails,
@@ -38,6 +46,12 @@ export const PlantDetailScreen = ({ plant }: { plant: PlantDetails }) => {
     // Save the updated plant details (e.g., send to API or update state)
     console.log("Updated Plant Details:", editablePlant)
     handleCloseModal()
+  }
+
+  const handleAddToCollection = () => {
+    // TODO: Add logic to add the plant to the user's collection
+    // Logic to add the plant to the user's collection
+    console.log("Adding to collection:", editablePlant)
   }
 
   return (
@@ -52,7 +66,8 @@ export const PlantDetailScreen = ({ plant }: { plant: PlantDetails }) => {
         <li>Watering Rate: {plant.wateringRate}</li>
         <li>Image: {plant.plantImage && <img src={plant.plantImage} alt="Plant" />}</li>
       </ul>
-      <Button onClick={handleEditClick}>Edit Details</Button>
+      <Button onClick={handleEditClick}><FaEdit/>Edit Details</Button>
+      {plant.isSearchResult && <Button onClick={handleAddToCollection}>Add to My Plants</Button>}
 
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>

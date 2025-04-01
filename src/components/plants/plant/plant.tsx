@@ -2,7 +2,7 @@
 import React from 'react'
 import { Card, ListGroupItem, ListGroup } from 'react-bootstrap';
 import './plant.css'
-import { PlantProps } from '../model/types';
+import { PlantProps } from '../Types/types';
 import { useTheme } from 'styled-components';
 import { lightTheme } from "../../theme/theme";
 
@@ -17,15 +17,15 @@ const Plant: React.FC<PlantProps> = (
   return (
     <Card bg={themeSwitch}>
       <Card.Header></Card.Header>
-      {props.previewDetails?.plantImage && <Card.Img variant="top" src={`${props.previewDetails?.plantImage}`} className="img-fluid"/>}
+      {props.localDetails?.plantImage && <Card.Img variant="top" src={`${props.localDetails?.plantImage}`} className="img-fluid"/>}
       <Card.Body>
-        {props.owned ? <Card.Title>{props.previewDetails.nickName}</Card.Title> : <Card.Title>{props.previewDetails.realName}</Card.Title> }
-        {props.owned && <Card.Subtitle>{props.previewDetails.realName}</Card.Subtitle> }
-        <Card.Text>Care: {props.previewDetails.careInstructions}</Card.Text>
+        {props.owned ? <Card.Title>{props.localDetails.nickName}</Card.Title> : <Card.Title>{props.localDetails.realName}</Card.Title> }
+        {props.owned && <Card.Subtitle>{props.localDetails.realName}</Card.Subtitle> }
+        <Card.Text>Care: {props.localDetails.careInstructions}</Card.Text>
       </Card.Body>
       <ListGroup>
-        {props.previewDetails?.cycle && <ListGroupItem>
-          Cycle: {props.previewDetails?.cycle}
+        {props.localDetails?.cycle && <ListGroupItem>
+          Cycle: {props.localDetails?.cycle}
         </ListGroupItem>
         }
         {props.owned && <ListGroupItem>

@@ -1,57 +1,62 @@
-import React from "react"
+import React from "react";
 // import { ThemeContext } from "styled-components"
 // import { lightTheme } from "../../theme/theme"
-import Plant from "../Plant/Plant"
-import CardGroup from 'react-bootstrap/CardGroup' 
-import { getPlants, getSensorData } from "../../../service/db-ops/plant-ops"
-import { useEffect, useState } from "react"
-import { PlantDetails, PlantProps, SensorData } from "../model/types"
+import Plant from "../plant/plant";
+import CardGroup from "react-bootstrap/CardGroup";
+import { getPlants, getSensorData } from "../../../service/db-ops/plant-ops";
+import { useEffect, useState } from "react";
+import { PlantDetails, PlantProps, SensorData } from "../Types/types";
 
-const PlantContainer = async (idList: [number]) => {
-  const [plants, setPlants] = useState<PlantProps[]>([])
+const PlantContainer: React.FC = () => {
+	const [idList, setIdList] = useState<number[]>([]);
+	const [plants, setPlants] = useState<PlantProps[]>([]);
 
-  const updateObjectInArray = (array, objectId, updateFields) => {
-    return array.map((item) =>
-      item.id === objectId ? { ...item, ...updateFields } : item
-    );
-  };
-  
-  const fetchPlants = async () => {
-    try {
-      const fetchedPlants: PlantDetails[] = await getPlants(idList);
-      // update all plant objects for matching Ids
-      fetchedPlants.forEach((plant) => {
-        setPlants((plants) => updateObjectInArray(plants, plant.plantId, plant))
-      })
-    } catch (error) {
-      console.error("Error fetching plant details:", error);
-    }
-  };
+	const updateObjectInArray = (array, objectId, updateFields) => {
+		return array.map((item) =>
+			item.id === objectId ? { ...item, ...updateFields } : item
+		);
+	};
 
-  const fetchSensorData = async () => {
-    try {
-      const fetchedSensorData: SensorData[] = await getSensorData(idList);
-      fetchedSensorData.forEach((sensorData) => {
-        setPlants((plants) => updateObjectInArray(plants, sensorData.plantId, sensorData))
-      })
-    } catch (error) {
-      console.error("Error fetching sensor data:", error)
-    }
-  }
+	const fetchPlants = async () => {
+		try {
+			const fetchedPlants: PlantDetails[] = await getPlants(idList);
+			// update all plant objects for matching Ids
+			fetchedPlants.forEach((plant) => {
+				setPlants((plants) =>
+					updateObjectInArray(plants, plant.plantId, plant)
+				);
+			});
+		} catch (error) {
+			console.error("Error fetching plant details:", error);
+		}
+	};
 
-  useEffect(() => {
-    fetchPlants()
-    fetchSensorData()
-  }, [idList])
+	const fetchSensorData = async () => {
+		try {
+			const fetchedSensorData: SensorData[] = await getSensorData(idList);
+			fetchedSensorData.forEach((sensorData) => {
+				setPlants((plants) =>
+					updateObjectInArray(plants, sensorData.plantId, sensorData)
+				);
+			});
+		} catch (error) {
+			console.error("Error fetching sensor data:", error);
+		}
+	};
 
-  return (
-    <div>
-      <CardGroup>
-        {plants.map((plantItem, index) => {
-          return <Plant {...plantItem} key={index} />
-        })}
-      </CardGroup>
-    </div>
-  )
-}
+	useEffect(() => {
+		fetchPlants();
+		fetchSensorData();
+	}, [idList]);
+
+	return (
+		<div>
+			<CardGroup>
+				{plants.map((plantItem, index) => {
+					return <Plant {...plantItem} key={index} />;
+				})}
+			</CardGroup>
+		</div>
+	);
+};
 export default PlantContainer;
