@@ -17,6 +17,20 @@ export const getUserCollection = async (userId: string) => {
     }
 }
 
+export const getSummaryStats = async (userId: string) => {
+    const queryParams = new URLSearchParams({ userId })
+    try {
+        const response = await fetch(`http://localhost:5000/api/summary` + queryParams, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        return response.json()
+    } catch (error) {
+        console.error("Error fetching summary stats:", error)
+    }
+}
 
 export const getPlants = async (idList: [number]) => {
     const queryParams = idList.join(',')
