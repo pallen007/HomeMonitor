@@ -1,62 +1,107 @@
-import React from "react";
-// import { ThemeContext } from "styled-components"
-// import { lightTheme } from "../../theme/theme"
-import Plant from "../plant/plant";
-import CardGroup from "react-bootstrap/CardGroup";
-import { getPlants, getSensorData } from "../../../service/db-ops/plant-ops";
-import { useEffect, useState } from "react";
-import { PlantDetails, PlantProps, SensorData } from "../Types/types";
+import React, { useEffect, useState } from 'react';
+import CardGroup from 'react-bootstrap/CardGroup';
+import {
+    DEMO_USER_ID,
+    deletePlantFromCollection,
+    getSensorData,
+    getUserCollection,
+    markPlantWatered,
+    notifyCollectionUpdated,
+} from '../../../service/db-ops/plant-ops';
+import Plant from '../plant/plant';
+import { PlantProps, SensorData } from '../Types/types';
 
 const PlantContainer: React.FC = () => {
-	const [idList, setIdList] = useState<number[]>([]);
-	const [plants, setPlants] = useState<PlantProps[]>([]);
+    const [plants, setPlants] = useState<PlantProps[]>([]);
 
-	const updateObjectInArray = (array, objectId, updateFields) => {
-		return array.map((item) =>
-			item.id === objectId ? { ...item, ...updateFields } : item
-		);
-	};
+    const normalizePlant = (plant: any, sensorMap: Map<number, SensorData>) => {
+        const sensor = sensorMap.get(plant.id);
+        return {
+            id: plant.id,
+            perenualId: plant.perenualId ?? plant.plantDetails?.perenualId ?? plant.id,
+            owned: true,
+            isSearchResult: false,
+            localDetails: {
+                perenualId: plant.perenualId ?? plant.id,
+                nickName: plant.nickName || plant.plantDetails?.common_name || 'My Plant',
+                realName: plant.plantDetails?.common_name || plant.nickName || 'My Plant',
+                careInstructions: plant.plantDetails?.watering || 'Check your plant regularly.',
+                cycle: plant.plantDetails?.cycle,
+                plantImage: plant.plantDetails?.default_image?.regular_url || plant.plantDetails?.default_image?.thumbnail,
+                plantThumbnail: plant.plantDetails?.default_image?.thumbnail,
+                wateringRate: plant.plantDetails?.watering || 'average',
+            },
+            sensorData: sensor
+                ? {
+                    plantId: plant.id,
+                    idealMoistureLevel: plant.idealMoistureLevel ?? sensor.idealMoistureLevel ?? 50,
+                    moistureLevel: sensor.moistureLevel,
+                    lastWatered: sensor.timestamp || plant.wateringSchedule?.lastWatered,
+                    timestamp: sensor.timestamp,
+                  }
+                : undefined,
+        } as PlantProps;
+    };
 
-	const fetchPlants = async () => {
-		try {
-			const fetchedPlants: PlantDetails[] = await getPlants(idList);
-			// update all plant objects for matching Ids
-			fetchedPlants.forEach((plant) => {
-				setPlants((plants) =>
-					updateObjectInArray(plants, plant.plantId, plant)
-				);
-			});
-		} catch (error) {
-			console.error("Error fetching plant details:", error);
-		}
-	};
+    const fetchCollection = async () => {
+        try {
+            const collection = (await getUserCollection(DEMO_USER_ID)) || [];
+            const ids = collection.map((plant: any) => plant.id).filter(Boolean);
+            const sensorRows: SensorData[] = ids.length ? (await getSensorData(ids)) || [] : [];
+            const sensorMap = new Map<number, SensorData>(sensorRows.map((row) => [row.plantId, row]));
+            setPlants(collection.map((plant: any) => normalizePlant(plant, sensorMap)));
+        } catch (error) {
+            console.error('Error fetching collection:', error);
+        }
+    };
 
-	const fetchSensorData = async () => {
-		try {
-			const fetchedSensorData: SensorData[] = await getSensorData(idList);
-			fetchedSensorData.forEach((sensorData) => {
-				setPlants((plants) =>
-					updateObjectInArray(plants, sensorData.plantId, sensorData)
-				);
-			});
-		} catch (error) {
-			console.error("Error fetching sensor data:", error);
-		}
-	};
+    const handleRemoveFromCollection = async (plantId?: number) => {
+        if (!plantId) return;
+        await deletePlantFromCollection(plantId, DEMO_USER_ID);
+        notifyCollectionUpdated();
+        await fetchCollection();
+    };
 
-	useEffect(() => {
-		fetchPlants();
-		fetchSensorData();
-	}, [idList]);
+    const handleMarkWatered = async (plantId?: number) => {
+        if (!plantId) return;
+        await markPlantWatered(plantId, DEMO_USER_ID);
+        notifyCollectionUpdated();
+        await fetchCollection();
+    };
 
-	return (
-		<div>
-			<CardGroup>
-				{plants.map((plantItem, index) => {
-					return <Plant {...plantItem} key={index} />;
-				})}
-			</CardGroup>
-		</div>
-	);
+    useEffect(() => {
+        fetchCollection();
+
+        const handleCollectionChange = () => {
+            fetchCollection();
+        };
+
+        window.addEventListener('plant-collection-updated', handleCollectionChange);
+
+        return () => {
+            window.removeEventListener('plant-collection-updated', handleCollectionChange);
+        };
+    }, []);
+
+    return (
+        <div style={{ padding: '20px' }}>
+            <h1>My Plants</h1>
+            <CardGroup style={{ display: 'flex', flexWrap: 'wrap' }}>
+                {plants.length === 0 ? (
+                    <p>No plants in your collection yet.</p>
+                ) : (
+                    plants.map((plantItem) => (
+                        <Plant
+                            {...plantItem}
+                            key={plantItem.id ?? plantItem.perenualId ?? plantItem.localDetails?.realName}
+                            onRemoveFromCollection={handleRemoveFromCollection}
+                            onMarkWatered={handleMarkWatered}
+                        />
+                    ))
+                )}
+            </CardGroup>
+        </div>
+    );
 };
+
 export default PlantContainer;
