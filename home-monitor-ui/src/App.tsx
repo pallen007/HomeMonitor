@@ -1,15 +1,15 @@
-import React, { createContext, useContext, useState } from "react";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
-import { FaHome, FaLeaf, FaSearch } from "react-icons/fa";
-import "./App.css";
-import { ThemeContext, ThemeProvider } from "styled-components";
-import { GlobalStyles } from "./Components/theme/global";
-import { useDarkMode } from "./Components/theme/useDarkMode";
-import PlantContainer from "./components/plants/PlantContainer/PlantContainer";
-import { darkTheme, lightTheme } from "./components/theme/theme";
-import { Form } from "react-bootstrap";
-import PlantLookup from "./components/plants/PlantLookup/PlantLookup";
-import Summary from "./Components/Summary/Summary";
+import React, { createContext, useContext, useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { FaHome, FaLeaf, FaSearch } from 'react-icons/fa';
+import './App.css';
+import { ThemeContext, ThemeProvider } from 'styled-components';
+import { GlobalStyles } from './components/theme/global';
+import { useDarkMode } from './components/theme/useDarkMode';
+import PlantContainer from './components/plants/PlantContainer/PlantContainer';
+import { darkTheme, lightTheme } from './components/theme/theme';
+import { Form } from 'react-bootstrap';
+import PlantLookup from './components/plants/PlantLookup/PlantLookup';
+import Summary from './components/Summary/Summary';
 
 export const PlantContext = createContext({});
 
