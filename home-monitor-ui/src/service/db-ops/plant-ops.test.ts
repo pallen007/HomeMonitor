@@ -1,8 +1,9 @@
 import { notifyCollectionUpdated } from './plant-ops';
+import { vi } from 'vitest';
 
 describe('notifyCollectionUpdated', () => {
   it('dispatches a collection refresh event', () => {
-    const dispatchSpy = jest.spyOn(window, 'dispatchEvent');
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
 
     notifyCollectionUpdated();
 
