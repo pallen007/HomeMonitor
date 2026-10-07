@@ -8,7 +8,6 @@ import { PlantProps } from '../Types/types';
 
 const PlantLookup: React.FC = () => {
     const [filters, setFilters] = useState<SearchOptions>({
-        key: '',
         query: '',
         order: 'asc',
         edible: null,

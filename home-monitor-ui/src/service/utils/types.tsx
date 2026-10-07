@@ -1,5 +1,4 @@
 export type SearchOptions = {
-    key: string
     page?: number
     query?: string
     order?: 'asc' | 'desc'
@@ -12,7 +11,6 @@ export type SearchOptions = {
     hardiness?: number // Hardness zone, 1-13
 }
 export const defaultSearchOptions: SearchOptions = {
-    key: '',
     page: 1,
     query: '',
     order: 'asc',

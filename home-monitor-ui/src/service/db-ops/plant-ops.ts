@@ -10,7 +10,7 @@ export const notifyCollectionUpdated = () => {
 
 export const getUserCollection = async (userId: string = DEMO_USER_ID) => {
     try {
-        const response = await fetch(`http://localhost:5000/api/plants/collection/${userId}`, {
+        const response = await fetch(`/api/plants/collection/${userId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -29,7 +29,7 @@ export const addPlantToCollection = async (plant: Record<string, any>, userId: s
     };
 
     try {
-        const response = await fetch('http://localhost:5000/api/plants', {
+        const response = await fetch('/api/plants', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ export const addPlantToCollection = async (plant: Record<string, any>, userId: s
 
 export const deletePlantFromCollection = async (plantId: number, userId: string = DEMO_USER_ID) => {
     try {
-        const response = await fetch(`http://localhost:5000/api/plants/${userId}/${plantId}`, {
+        const response = await fetch(`/api/plants/${userId}/${plantId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ export const deletePlantFromCollection = async (plantId: number, userId: string 
 
 export const getSummaryStats = async (userId: string = DEMO_USER_ID) => {
     try {
-        const response = await fetch(`http://localhost:5000/api/summary?userId=${encodeURIComponent(userId)}`, {
+        const response = await fetch(`/api/summary?userId=${encodeURIComponent(userId)}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ export const getSummaryStats = async (userId: string = DEMO_USER_ID) => {
 export const getPlants = async (idList: number[] = [], userId: string = DEMO_USER_ID) => {
     const ids = idList.length ? `?ids=${idList.join(',')}` : '';
     try {
-        const response = await fetch(`http://localhost:5000/api/plants/collection/${userId}${ids}`, {
+        const response = await fetch(`/api/plants/collection/${userId}${ids}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ export const getPlants = async (idList: number[] = [], userId: string = DEMO_USE
 
 export const updatePlant = async (id: number, userId: string = DEMO_USER_ID, plantDetails: Partial<PerenualPlantDetails> & Record<string, any>) => {
     try {
-        const response = await fetch(`http://localhost:5000/api/plants/${userId}/${id}`, {
+        const response = await fetch(`/api/plants/${userId}/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ export const markPlantWatered = async (id: number, userId: string = DEMO_USER_ID
 export const getSensorData = async (idList: number[] = []) => {
     const queryParams = idList.length ? `?ids=${idList.join(',')}` : '';
     try {
-        const response = await fetch(`http://localhost:5000/api/sensor${queryParams}`, {
+        const response = await fetch(`/api/sensor${queryParams}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
