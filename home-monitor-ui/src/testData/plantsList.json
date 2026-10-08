@@ -1,0 +1,20 @@
+{
+    "Plants": [
+        {
+            "nickName": "Nana",
+            "realName": "Fiddle Leaf Fig",
+            "moistureLevel": 5,
+            "lastWatered": "2021-10-20",
+            "careInstructions": "Water thoroughly whenever the top 2\" of soil have dried. Soil should be consistently, evenly moist with a brief drying out period. Water enough to saturate, then wait 30 minutes for excess to collect at the bottom before draining excess.",
+            "plantImage": "assets/testData/plantImages/fiddleLeaf.png"
+        },
+        {
+            "nickName": "Brady",
+            "realName": "Guiana Chestnut (\"Money Tree\")",
+            "moistureLevel": 7,
+            "lastWatered": "2021-10-20",
+            "careInstructions": "Water thouroughly every week and immediately drain excess. Moderate sunlight.",
+            "plantImage": "assets/testData/plantImages/moneyTree.jpg"
+        }
+    ]
+}
