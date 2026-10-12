@@ -32,9 +32,18 @@ services:
       PORT: 5000
       MONGODB_URI: mongodb://mongo:27017/home-monitor
       PERENUAL_API_KEY: ${PERENUAL_API_KEY}
+    command:
+      - /bin/sh
+      - -c
+      - |
+        until node -e 'const net = require("node:net"); const socket = net.createConnection(27017, "mongo"); socket.setTimeout(1000); socket.on("connect", () => { socket.destroy(); process.exit(0); }); socket.on("error", () => process.exit(1)); socket.on("timeout", () => { socket.destroy(); process.exit(1); });'; do
+          echo "Waiting for MongoDB at mongo:27017..."
+          sleep 2
+        done
+        exec node dist/index.js
     depends_on:
       mongo:
-        condition: service_healthy
+        condition: service_started
     deploy:
       resources:
         limits:

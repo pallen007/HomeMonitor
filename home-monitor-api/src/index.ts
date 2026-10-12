@@ -12,19 +12,25 @@ const PORT = Number(process.env.PORT) || 5000;
 
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/home-monitor';
 
-if (require.main === module) {
-    mongoose
-        .connect(MONGO_URI)
-        .then(() => {
+async function connectToMongo(): Promise<void> {
+    while (true) {
+        try {
+            await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
             console.log('Connected to MongoDB');
-            app.listen(PORT, '0.0.0.0', () => {
-                console.log(`API is running on port ${PORT}`);
-            });
-        })
-        .catch((error) => {
-            console.error('Error connecting to MongoDB:', error);
-            process.exitCode = 1;
+            return;
+        } catch (error) {
+            console.error('Error connecting to MongoDB; retrying in 2 seconds:', error);
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+    }
+}
+
+if (require.main === module) {
+    connectToMongo().then(() => {
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`API is running on port ${PORT}`);
         });
+    });
 }
 
 app.use(cors());
