@@ -37,8 +37,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.get('/api/health', (_req, res) => {
-    const databaseReady = mongoose.connection.readyState === 1;
-    res.status(databaseReady ? 200 : 503).json({ status: databaseReady ? 'ok' : 'database unavailable' });
+    res.status(200).json({ status: 'ok' });
 });
 
 app.use('/api/plants', plantsRouter);

@@ -40,7 +40,7 @@ services:
           echo "Waiting for MongoDB at mongo:27017..."
           sleep 2
         done
-        exec node dist/index.js
+        exec node /api/dist/index.js
     depends_on:
       mongo:
         condition: service_started
