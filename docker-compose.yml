@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: mongo:6
+    image: mongo:4.4.18
     container_name: mongodb_server
     restart: unless-stopped
     ports:
@@ -22,17 +22,28 @@ services:
 
   home-monitor-api:
     build: 
-      context: ./home-monitor-api
+      ## Temporary manual build until pipeline is refined
+      # context: ./home-monitor-api
+      context: ./api
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: 5000
-      MONGODB_URI: mongodb://mongo:27017/home-monitor
+      MONGODB_URI: ${MONGODB_URI}
       PERENUAL_API_KEY: ${PERENUAL_API_KEY}
+    command:
+      - /bin/sh
+      - -c
+      - |
+        until node -e 'const net = require("node:net"); const socket = net.createConnection(27017, "mongo"); socket.setTimeout(1000); socket.on("connect", () => { socket.destroy(); process.exit(0); }); socket.on("error", () => process.exit(1)); socket.on("timeout", () => { socket.destroy(); process.exit(1); });'; do
+          echo "Waiting for MongoDB at mongo:27017..."
+          sleep 2
+        done
+        exec node /dist/index.js
     depends_on:
       mongo:
-        condition: service_healthy
+        condition: service_started
     deploy:
       resources:
         limits:
@@ -45,13 +56,17 @@ services:
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 30s
-      timeout: 10s
-      retries: 5
+      timeout: 20s
+      retries: 10
 
   home-monitor-ui:
-    image: home-monitor-ui:latest
+    # image: home-monitor-ui:latest
     container_name: home-monitor-ui
-    build: ./home-monitor-ui
+    ## Temporary manual build until pipeline is refined
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    # build: ./home-monitor-ui
     restart: unless-stopped
     depends_on:
       home-monitor-api:

@@ -5,6 +5,7 @@ export interface LocalPlantDetails {
     cycle?: string
     nickName?: string
     plantImage?: string
+    plantImageFallbacks?: string[]
     plantThumbnail?: string
     realName?: string
     wateringRate?: string
@@ -30,4 +31,3 @@ export type PlantProps = {
     onRemoveFromCollection?: (plantId?: number) => void | Promise<void>
     onMarkWatered?: (plantId?: number) => void | Promise<void>
 }
-

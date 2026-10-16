@@ -31,19 +31,34 @@ const forwardRequest = async (path: string, query: URLSearchParams, res: any) =>
     }
 
     query.set('key', apiKey);
+    const url = new URL(path, PERENUAL_BASE_URL + '/');
+    url.search = query.toString();
+
+    let response: Response;
     try {
-        const response = await fetch(new URL(path, PERENUAL_BASE_URL + '/').toString() + `?${query}`);
-        const body = await response.json();
-        return res.status(response.status).json(body);
+        response = await fetch(url);
     } catch (error) {
-        console.error('Error forwarding Perenual request:', error);
+        console.error('Unable to connect to Perenual API:', error);
         return res.status(502).json({ error: 'Perenual request failed' });
+    }
+
+    const contentType = response.headers.get('content-type') || 'text/plain';
+    const body = await response.text();
+    if (!contentType.includes('application/json')) {
+        return res.status(response.status).set('Content-Type', contentType).send(body);
+    }
+
+    try {
+        return res.status(response.status).json(JSON.parse(body));
+    } catch (error) {
+        console.error(`Perenual API returned invalid JSON (HTTP ${response.status}):`, error);
+        return res.status(502).json({ error: 'Perenual returned an invalid response' });
     }
 };
 
 router.get('/search', (req: any, res: any) => {
     const query = new URLSearchParams();
-    const allowedParameters = ['page', 'query', 'order', 'edible', 'poisonous', 'cycle', 'watering', 'sunlight', 'indoor', 'hardiness'];
+    const allowedParameters = ['page', 'q', 'order', 'edible', 'poisonous', 'cycle', 'watering', 'sunlight', 'indoor', 'hardiness'];
 
     for (const parameter of allowedParameters) {
         const value = req.query[parameter]?.toString();

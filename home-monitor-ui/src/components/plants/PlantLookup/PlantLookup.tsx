@@ -6,20 +6,34 @@ import { SearchOptions } from '../../../service/utils/types';
 import Plant from '../plant/plant';
 import { PlantProps } from '../Types/types';
 
+const RESULTS_PER_PAGE = 10;
+
 const PlantLookup: React.FC = () => {
     const [filters, setFilters] = useState<SearchOptions>({
         query: '',
         order: 'asc',
-        edible: null,
-        poisonous: null,
-        cycle: 'annual',
-        watering: 'average',
-        sunlight: 'full_sun',
-        indoor: null,
-        hardiness: 1,
+        // // Commenting out default filters, since they are limiting results too much.
+        // edible: null,
+        // poisonous: null,
+        // cycle: 'annual',
+        // watering: 'average',
+        // sunlight: 'full_sun',
+        // indoor: null,
+        // hardiness: 1,
     });
     const [plants, setPlants] = useState<PlantProps[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState<boolean>(false);
+    const [searchError, setSearchError] = useState<string | null>(null);
+    const pageCount = Math.ceil(plants.length / RESULTS_PER_PAGE);
+    const visiblePlants = plants.slice(
+        (currentPage - 1) * RESULTS_PER_PAGE,
+        currentPage * RESULTS_PER_PAGE,
+    );
+
+    useEffect(() => {
+        setCurrentPage((page) => Math.min(page, Math.max(1, pageCount)));
+    }, [pageCount]);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
@@ -29,13 +43,17 @@ const PlantLookup: React.FC = () => {
         }));
     };
 
-    const executeSearch = async () => {
+    const executeSearch = async (event?: React.FormEvent<HTMLFormElement>) => {
+        event?.preventDefault();
         setLoading(true);
+        setSearchError(null);
+        setCurrentPage(1);
         try {
             const results: PlantProps[] = (await plantSearch(filters)) || [];
             setPlants(results);
         } catch (error) {
             console.error('Error fetching plants:', error);
+            setSearchError(error instanceof Error ? error.message : 'Plant search failed');
         } finally {
             setLoading(false);
         }
@@ -69,19 +87,23 @@ const PlantLookup: React.FC = () => {
         if (createdPlant) {
             notifyCollectionUpdated();
             setPlants((currentPlants) =>
-                currentPlants.filter((item) => (item.perenualId ?? item.id) !== (plant.perenualId ?? plant.id))
+                currentPlants.filter(
+                    (item) => (item.perenualId ?? item.id) !== (plant.perenualId ?? plant.id),
+                ),
             );
         }
     };
 
-    useEffect(() => {
-        executeSearch();
-    }, [filters]);
+    // // This is causing the search to re-execute on every keystroke
+    // // Need to update the filters mechanism to not include the search query itself before re-enabling this
+    // useEffect(() => {
+    //     executeSearch();
+    // }, [filters]);
 
     return (
         <div style={{ padding: '20px' }}>
             <h1>Plant Lookup</h1>
-            <Form>
+            <Form onSubmit={executeSearch}>
                 <Row>
                     <Col>
                         <Form.Group>
@@ -96,15 +118,16 @@ const PlantLookup: React.FC = () => {
                         </Form.Group>
                     </Col>
                 </Row>
-                <Button variant="primary" onClick={executeSearch} disabled={loading}>
+                <Button type="submit" variant="primary" disabled={loading}>
                     {loading ? 'Searching...' : 'Search'}
                 </Button>
             </Form>
             <div style={{ marginTop: '20px' }}>
                 <h2>Results</h2>
-                {plants.length === 0 && !loading && <p>No plants found.</p>}
+                {searchError && <p role="alert">Unable to search for plants: {searchError}</p>}
+                {!searchError && plants.length === 0 && !loading && <p>No plants found.</p>}
                 <CardGroup style={{ display: 'flex', flexWrap: 'wrap' }}>
-                    {plants.map((plant) => (
+                    {visiblePlants.map((plant) => (
                         <Plant
                             {...plant}
                             key={plant.perenualId ?? plant.id ?? `${plant.localDetails?.realName}-lookup`}
@@ -114,6 +137,27 @@ const PlantLookup: React.FC = () => {
                         />
                     ))}
                 </CardGroup>
+                {pageCount > 1 && (
+                    <div className="d-flex align-items-center justify-content-center gap-3 mt-3">
+                        <Button
+                            variant="outline-primary"
+                            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                            disabled={currentPage === 1}
+                        >
+                            Previous
+                        </Button>
+                        <span>
+                            Page {currentPage} of {pageCount}
+                        </span>
+                        <Button
+                            variant="outline-primary"
+                            onClick={() => setCurrentPage((page) => Math.min(pageCount, page + 1))}
+                            disabled={currentPage === pageCount}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     );

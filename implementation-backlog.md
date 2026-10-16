@@ -23,6 +23,9 @@ Build a usable home plant monitoring product from the current prototype, focusin
 - [ ] Let the user edit nickname and room assignment before saving
 - [x] Store a local plant profile that combines external botanical data with user-specific data
 
+### 1.4 Deployment optimization
+- [ ] Isolate deployments (db, api, ui) so that individual containers can be rebuilt without re-deploying the entire project
+
 ## Phase 2: Monitoring and alerts
 - [ ] Add sensor health and stale reading detection
 - [ ] Expand the sensor model to include humidity, light, and battery status
@@ -37,12 +40,15 @@ Build a usable home plant monitoring product from the current prototype, focusin
 - [ ] Let users review care actions over time
 
 ## Phase 4: Production-quality platform work
-- [ ] Move config to environment variables
-- [ ] Add validation, error handling, and health checks
-- [ ] Add proper database setup (currently using MongoDB; setup documented)
-- [ ] Support deployment to a real backend and DB
-- [ ] Add test coverage for API and UI flows
+- [x] Move config to environment variables
+- [x] Add validation, error handling, and health checks
+- [x] Add proper database setup (currently using MongoDB; setup documented)
+- [x] Support deployment to a real backend and DB
+- [x] Add test coverage for API and UI flows
 - [ ] Add auth/session model once the feature set is stable
+
+## Phase 5: Cleanup, tweaking, future improvements
+- [ ] Prettify UI - make navigation more intuitive and easier to see
 
 ## Completed Infrastructure Work
 

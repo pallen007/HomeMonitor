@@ -31,49 +31,51 @@ const App: React.FC = () => {
 			<PlantContext.Provider value={{ plantContext, setPlantContext }}>
 				<GlobalStyles />
 				<Router>
-					<Routes>
-						<Route path="/" element={<Summary />} />
-						<Route path="/plants" element={<PlantContainer />} />
-						<Route path="/lookup" element={<PlantLookup />} />
-						{/* <Route path="/guides" element={<Guides />} /> */}
-					</Routes>
-				</Router>
-				<footer>
-					<div>
-						<Link to="/">
-							<FaHome size={24} />
-							<p>Home</p>
-						</Link>
-					</div>
-					<div>
-						<Link to="/plants">
-							<FaLeaf size={24} />
-							<p>My Plants</p>
-						</Link>
-					</div>
-					<div>
-						<Link to="/lookup">
-							<FaSearch size={24} />
-							<p>Lookup</p>
-						</Link>
-					</div>
-					{/* <div>
+					<>
+						<Routes>
+							<Route path="/" element={<Summary />} />
+							<Route path="/plants" element={<PlantContainer />} />
+							<Route path="/lookup" element={<PlantLookup />} />
+							{/* <Route path="/guides" element={<Guides />} /> */}
+						</Routes>
+						<footer>
+							<div>
+								<Link to="/">
+									<FaHome size={24} />
+									<p>Home</p>
+								</Link>
+							</div>
+							<div>
+								<Link to="/plants">
+									<FaLeaf size={24} />
+									<p>My Plants</p>
+								</Link>
+							</div>
+							<div>
+								<Link to="/lookup">
+									<FaSearch size={24} />
+									<p>Lookup</p>
+								</Link>
+							</div>
+							{/* <div>
                     <Link to="/guides">
                     <FaBook size={24} />
                         <p>Guides</p>
                     </Link>
                 </div> */}
-					<Form>
-						<Form.Check
-							checked={themeSwitch === "dark"}
-							type="switch"
-							id="darkmode-switch"
-							label="Dark Mode"
-							onChange={toggleTheme}
-							readOnly
-						/>
-					</Form>
-				</footer>
+							<Form>
+								<Form.Check
+									checked={themeSwitch === "dark"}
+									type="switch"
+									id="darkmode-switch"
+									label="Dark Mode"
+									onChange={toggleTheme}
+									readOnly
+								/>
+							</Form>
+						</footer>
+					</>
+				</Router>
 			</PlantContext.Provider>
 		</ThemeProvider>
 	);
