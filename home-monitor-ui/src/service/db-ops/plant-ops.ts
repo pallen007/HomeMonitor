@@ -16,9 +16,17 @@ export const getUserCollection = async (userId: string = DEMO_USER_ID) => {
                 'Content-Type': 'application/json',
             }
         });
-        return response.json();
+        const collection = await response.json();
+        if (!response.ok) {
+            throw new Error(`API request failed (${response.status}): ${collection.error || response.statusText}`);
+        }
+        if (!Array.isArray(collection)) {
+            throw new Error('API returned an invalid plant collection');
+        }
+        return collection;
     } catch (error) {
         console.error('Error fetching user collection:', error);
+        throw error;
     }
 };
 
@@ -68,9 +76,14 @@ export const getSummaryStats = async (userId: string = DEMO_USER_ID) => {
                 'Content-Type': 'application/json',
             }
         });
-        return response.json();
+        const summary = await response.json();
+        if (!response.ok) {
+            throw new Error(`API request failed (${response.status}): ${summary.error || response.statusText}`);
+        }
+        return summary;
     } catch (error) {
         console.error('Error fetching summary stats:', error);
+        throw error;
     }
 };
 

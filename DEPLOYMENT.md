@@ -7,4 +7,6 @@
 
 The API waits for MongoDB's TCP port before starting, then retries its database connection until MongoDB is ready. MongoDB does not need a Compose healthcheck.
 
+Set `MONGODB_URI` to an authenticated MongoDB URI, for example `mongodb://admin:adminpassword@mongo:27017/home-monitor?authSource=admin`. Its username and password must match the credentials used when the persistent data volume was initialized. Percent-encode URI-reserved characters in the username or password.
+
 The UI port is published on the host's interfaces, so it is available to devices on the LAN unless the host firewall restricts it. Do not configure router port forwarding for this setup: the app currently uses a shared demo user and has no authentication. The API key is read only by the API container and is not part of the UI build. Rotate the old key if it has ever been included in a browser build or otherwise exposed.
