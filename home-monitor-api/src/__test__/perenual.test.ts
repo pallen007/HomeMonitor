@@ -13,17 +13,18 @@ describe('Perenual API proxy', () => {
         const upstreamBody = { data: [{ id: 42, common_name: 'Test plant' }] };
         const upstreamFetch = vi.fn().mockResolvedValue({
             status: 200,
-            json: async () => upstreamBody,
+            headers: { get: () => 'application/json' },
+            text: async () => JSON.stringify(upstreamBody),
         });
         vi.stubGlobal('fetch', upstreamFetch);
 
-        const response = await request(app).get('/api/perenual/search?query=fern&indoor=false');
+        const response = await request(app).get('/api/perenual/search?q=fern&indoor=false');
 
         expect(response.status).toBe(200);
         expect(response.body).toEqual(upstreamBody);
         const upstreamUrl = new URL(upstreamFetch.mock.calls[0][0]);
         expect(upstreamUrl.pathname).toBe('/api/v2/species-list');
-        expect(upstreamUrl.searchParams.get('query')).toBe('fern');
+        expect(upstreamUrl.searchParams.get('q')).toBe('fern');
         expect(upstreamUrl.searchParams.get('indoor')).toBe('false');
         expect(upstreamUrl.searchParams.get('key')).toBe('test-secret');
         expect(JSON.stringify(response.body)).not.toContain('test-secret');
@@ -42,7 +43,8 @@ describe('Perenual API proxy', () => {
         vi.stubEnv('PERENUAL_API_KEY', 'test-secret');
         const upstreamFetch = vi.fn().mockResolvedValue({
             status: 200,
-            json: async () => ({ data: [] }),
+            headers: { get: () => 'application/json' },
+            text: async () => JSON.stringify({ data: [] }),
         });
         vi.stubGlobal('fetch', upstreamFetch);
 
@@ -58,5 +60,54 @@ describe('Perenual API proxy', () => {
         expect(diseaseUrl.searchParams.get('id')).toBe('42');
         expect(diseaseUrl.searchParams.get('query')).toBe('spot');
         expect(diseaseUrl.searchParams.get('key')).toBe('test-secret');
+    });
+
+    test('returns a diagnostic 502 response when the upstream request cannot connect', async () => {
+        vi.stubEnv('PERENUAL_API_KEY', 'test-secret');
+        vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('connect timeout')));
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        const response = await request(app).get('/api/perenual/species/42');
+
+        expect(response.status).toBe(502);
+        expect(response.body.error).toBe('Perenual request failed');
+        expect(console.error).toHaveBeenCalledWith(
+            'Unable to connect to Perenual API:',
+            expect.objectContaining({ message: 'connect timeout' }),
+        );
+    });
+
+    test('reports invalid JSON from the upstream service separately', async () => {
+        vi.stubEnv('PERENUAL_API_KEY', 'test-secret');
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            status: 502,
+            headers: { get: () => 'application/json' },
+            text: vi.fn().mockResolvedValue('not json'),
+        }));
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        const response = await request(app).get('/api/perenual/species/42');
+
+        expect(response.status).toBe(502);
+        expect(response.body.error).toBe('Perenual returned an invalid response');
+        expect(console.error).toHaveBeenCalledWith(
+            'Perenual API returned invalid JSON (HTTP 502):',
+            expect.any(SyntaxError),
+        );
+    });
+
+    test('preserves Perenual plain-text upgrade responses and their status', async () => {
+        vi.stubEnv('PERENUAL_API_KEY', 'test-secret');
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            status: 429,
+            headers: { get: () => 'text/plain; charset=UTF-8' },
+            text: async () => 'Please Upgrade your membership',
+        }));
+
+        const response = await request(app).get('/api/perenual/species/42');
+
+        expect(response.status).toBe(429);
+        expect(response.text).toBe('Please Upgrade your membership');
+        expect(response.headers['content-type']).toContain('text/plain');
     });
 });

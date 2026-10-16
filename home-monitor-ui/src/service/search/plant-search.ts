@@ -2,29 +2,71 @@
 import * as utils from '../utils/operations';
 import { PerenualPlantDetails, SearchOptions } from '../utils/types';
 
+const readJsonResponse = async (response: Response): Promise<unknown> => {
+    const body = await response.text();
+    if (!body) {
+        return {};
+    }
+
+    try {
+        return JSON.parse(body) as unknown;
+    } catch {
+        if (!response.ok) {
+            return body;
+        }
+        throw new Error('API returned an invalid JSON response');
+    }
+};
+
+const getErrorMessage = (body: unknown, fallback: string) => {
+    if (typeof body === 'string' && body) {
+        return body;
+    }
+    if (typeof body === 'object' && body !== null && 'error' in body && typeof body.error === 'string') {
+        return body.error;
+    }
+    return fallback;
+};
+
 export const plantSearch = async (searchOptions: SearchOptions) => {
     const queryParams = new URLSearchParams();
     Object.entries(searchOptions).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
-            queryParams.set(key, value.toString());
+            queryParams.set(key === 'query' ? 'q' : key, value.toString());
         }
     });
     try {
         const response = await fetch(`/api/perenual/search?${queryParams}`);
-        if (!response.ok) throw new Error(`Plant search failed (${response.status})`);
-        return utils.searchResultsToPlantData(await response.json());
+        const body = await readJsonResponse(response);
+        if (!response.ok) {
+            throw new Error(`Plant search failed (${response.status}): ${getErrorMessage(body, response.statusText)}`);
+        }
+        if (
+            typeof body !== 'object'
+            || body === null
+            || !('data' in body)
+            || !Array.isArray(body.data)
+        ) {
+            throw new Error('Plant search returned an invalid response');
+        }
+        return utils.searchResultsToPlantData(body.data);
     } catch (error) {
         console.error('Error fetching data:', error);
+        throw error;
     }
 };
 
 export const detailSearch = async (id: number) => {
     try {
         const response = await fetch(`/api/perenual/species/${id}`);
-        if (!response.ok) throw new Error(`Plant details request failed (${response.status})`);
-        return await response.json() as PerenualPlantDetails;
+        const details = await readJsonResponse(response);
+        if (!response.ok) {
+            throw new Error(`Plant details request failed (${response.status}): ${getErrorMessage(details, response.statusText)}`);
+        }
+        return details as PerenualPlantDetails;
     } catch (error) {
         console.error('Error fetching data:', error);
+        throw error;
     }
 };
 
