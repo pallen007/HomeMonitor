@@ -1,13 +1,17 @@
 export const lightTheme = {
+    mode: 'light',
     body: '#FAFAFA',
     text: '#363537',
-    toggleBorder: '#FFF',
-    gradient: 'linear-gradient(#39598A, #79D7ED)',
+    secondaryText: '#6C757D',
+    surface: '#FFFFFF',
+    border: '#DEE2E6',
 }
 
 export const darkTheme = {
-    body:'#363537',
+    mode: 'dark',
+    body: '#212529',
     text: '#FAFAFA',
-    toggleBorder: '#6B8096',
-    gradient: 'linear-gradient(#091236, #1E215D)',
+    secondaryText: '#ADB5BD',
+    surface: '#343A40',
+    border: '#495057',
 }

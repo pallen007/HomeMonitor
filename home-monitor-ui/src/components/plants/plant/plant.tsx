@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Card, ListGroup, ListGroupItem, Modal } from 'react-bootstrap';
-import { useTheme } from 'styled-components';
 import './plant.css';
 import { PlantProps } from '../Types/types';
-import { lightTheme } from '../../theme/theme';
 import { detailSearch } from '../../../service/search/plant-search';
 import { PerenualPlantDetails } from '../../../service/utils/types';
 
@@ -18,9 +16,6 @@ const Plant: React.FC<PlantProps> = (props: PlantProps) => {
     props.localDetails?.plantThumbnail,
   ].filter((source): source is string => Boolean(source))));
   const [imageIndex, setImageIndex] = useState(0);
-  const theme = useTheme();
-  const themeSwitch = theme === lightTheme ? 'light' : 'dark';
-
   const title = props.owned
     ? props.localDetails?.nickName || 'Unnamed plant'
     : props.localDetails?.realName || 'Plant lookup';
@@ -74,7 +69,6 @@ const Plant: React.FC<PlantProps> = (props: PlantProps) => {
   return (
     <>
     <Card
-      bg={themeSwitch}
       style={{ width: '18rem', margin: '12px', cursor: props.isSearchResult ? 'pointer' : undefined }}
       onClick={props.isSearchResult ? handleShowDetails : undefined}
     >

@@ -49,13 +49,13 @@ const Summary: React.FC = () => {
                 </div>
             </div>
             <div
+                className="summary-bottom-panel"
                 style={{
                     display: 'flex',
                     justifyContent: 'space-around',
                     alignItems: 'center',
                     padding: '10px',
-                    borderTop: '1px solid #ccc',
-                    backgroundColor: '#f8f8f8',
+                    borderTop: '1px solid',
                 }}
             >
             </div>

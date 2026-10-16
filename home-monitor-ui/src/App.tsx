@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { FaHome, FaLeaf, FaSearch } from 'react-icons/fa';
 import './App.css';
-import { ThemeContext, ThemeProvider } from 'styled-components';
+import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './components/theme/global';
 import { useDarkMode } from './components/theme/useDarkMode';
 import PlantContainer from './components/plants/PlantContainer/PlantContainer';
@@ -15,8 +15,7 @@ export const PlantContext = createContext({});
 
 const App: React.FC = () => {
 	const [theme, toggleTheme, componentMounted] = useDarkMode();
-	const themeContext = useContext(ThemeContext);
-	const themeMode = theme === "light" ? lightTheme : darkTheme;
+	const themeMode = theme === 'light' ? lightTheme : darkTheme;
 	const [plantContext, setPlantContext] = useState({
 		plantCollection: [],
 	});
@@ -24,8 +23,6 @@ const App: React.FC = () => {
 	if (!componentMounted) {
 		return <div>Something went wrong...</div>;
 	}
-	const themeSwitch = themeContext === lightTheme ? "light" : "dark";
-
 	return (
 		<ThemeProvider theme={themeMode}>
 			<PlantContext.Provider value={{ plantContext, setPlantContext }}>
@@ -65,12 +62,11 @@ const App: React.FC = () => {
                 </div> */}
 							<Form>
 								<Form.Check
-									checked={themeSwitch === "dark"}
+									checked={theme === 'dark'}
 									type="switch"
 									id="darkmode-switch"
 									label="Dark Mode"
 									onChange={toggleTheme}
-									readOnly
 								/>
 							</Form>
 						</footer>
