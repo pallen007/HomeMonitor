@@ -1,0 +1,6 @@
+{
+    "recommendations": [
+        "wmerkens.vscode-circuitpython-v2",
+        "padgettholdings.circuitpythonsync"
+    ]
+}

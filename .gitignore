@@ -1,4 +1,4 @@
-.vscode/
+
 
 # dependencies
 /node_modules
@@ -28,5 +28,5 @@ yarn-debug.log*
 yarn-error.log*
 
 # local files
-setting.json
+settings.json
 /.github
