@@ -1,109 +1,60 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { detailSearch, plantSearch } from './plant-search';
+import { wikipediaPlantSearch } from './plant-search';
 
 afterEach(() => {
     vi.unstubAllGlobals();
-    vi.restoreAllMocks();
 });
 
-describe('plantSearch', () => {
-    it('converts the data array from the Perenual response', async () => {
+describe('wikipediaPlantSearch', () => {
+    it('requests Wikipedia results and maps article and license metadata', async () => {
         const fetchMock = vi.fn().mockResolvedValue({
             ok: true,
             status: 200,
             text: async () => JSON.stringify({
-                data: [{
-                    id: 42,
-                    common_name: 'Test plant',
-                    default_image: {
-                        regular_url: 'https://example.com/plant.jpg',
-                        thumbnail: 'https://example.com/plant-small.jpg',
-                    },
-                }, {
-                    id: 43,
-                    common_name: 'Plant without an image',
-                    default_image: null,
+                results: [{
+                    pageId: 123,
+                    title: 'Monstera deliciosa',
+                    articleUrl: 'https://en.wikipedia.org/wiki/Monstera_deliciosa',
+                    summary: 'A tropical plant.',
+                    imageUrl: 'https://upload.wikimedia.org/example.jpg',
+                    imageSourceUrl: 'https://commons.wikimedia.org/wiki/File:Example.jpg',
+                    imageAttribution: 'Example photographer',
+                    imageLicense: 'CC BY-SA 4.0',
+                    imageLicenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+                    textLicense: 'CC BY-SA 4.0',
+                    textLicenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
                 }],
             }),
         });
         vi.stubGlobal('fetch', fetchMock);
 
-        await expect(plantSearch({ query: 'fern' })).resolves.toMatchObject([
-            {
-                perenualId: 42,
-                localDetails: {
-                    realName: 'Test plant',
-                    plantImage: 'https://example.com/plant.jpg',
-                    plantImageFallbacks: [
-                        'https://example.com/plant.jpg',
-                        'https://example.com/plant-small.jpg',
-                    ],
-                },
+        await expect(wikipediaPlantSearch('Monstera deliciosa')).resolves.toMatchObject([{
+            id: 123,
+            localDetails: {
+                realName: 'Monstera deliciosa',
+                plantDescription: 'A tropical plant.',
+                plantImage: 'https://upload.wikimedia.org/example.jpg',
+                imageAttribution: 'Example photographer',
+                imageLicense: 'CC BY-SA 4.0',
             },
-            {
-                perenualId: 43,
-                localDetails: {
-                    realName: 'Plant without an image',
-                    plantImage: undefined,
-                    plantThumbnail: undefined,
-                },
+            wikipediaSource: {
+                articleUrl: 'https://en.wikipedia.org/wiki/Monstera_deliciosa',
+                textLicense: 'CC BY-SA 4.0',
             },
-        ]);
-        expect(fetchMock).toHaveBeenCalledWith('/api/perenual/search?q=fern');
+        }]);
+        expect(fetchMock).toHaveBeenCalledWith('/api/wikipedia/search?q=Monstera+deliciosa');
     });
 
-    it('rejects an unsuccessful API response with its error message', async () => {
+    it('surfaces search errors instead of returning an empty result set', async () => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: false,
-            status: 503,
-            statusText: 'Service Unavailable',
-            text: async () => JSON.stringify({ error: 'Perenual API is not configured' }),
+            status: 502,
+            statusText: 'Bad Gateway',
+            text: async () => JSON.stringify({ error: 'Wikipedia plant search failed' }),
         }));
-        vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
-        await expect(plantSearch({ query: 'fern' })).rejects.toThrow(
-            'Plant search failed (503): Perenual API is not configured',
-        );
-    });
-
-    it('rejects a successful response without a data array', async () => {
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            ok: true,
-            status: 200,
-            text: async () => JSON.stringify({ error: 'Unexpected response' }),
-        }));
-        vi.spyOn(console, 'error').mockImplementation(() => undefined);
-
-        await expect(plantSearch({ query: 'fern' })).rejects.toThrow(
-            'Plant search returned an invalid response',
-        );
-    });
-
-    it('reports errors when fetching plant details', async () => {
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            ok: false,
-            status: 429,
-            statusText: 'Too Many Requests',
-            text: async () => 'Please Upgrade your membership',
-        }));
-        vi.spyOn(console, 'error').mockImplementation(() => undefined);
-
-        await expect(detailSearch(42)).rejects.toThrow(
-            'Plant details request failed (429): Please Upgrade your membership',
-        );
-    });
-
-    it('shows plain-text upgrade responses for plant searches', async () => {
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            ok: false,
-            status: 429,
-            statusText: 'Too Many Requests',
-            text: async () => 'Please Upgrade your membership',
-        }));
-        vi.spyOn(console, 'error').mockImplementation(() => undefined);
-
-        await expect(plantSearch({ query: 'fern' })).rejects.toThrow(
-            'Plant search failed (429): Please Upgrade your membership',
+        await expect(wikipediaPlantSearch('fern')).rejects.toThrow(
+            'Wikipedia plant search failed (502): Wikipedia plant search failed',
         );
     });
 });

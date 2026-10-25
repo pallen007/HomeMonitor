@@ -69,7 +69,8 @@ Build a usable home plant monitoring product from the current prototype, focusin
 - [x] Plant CRUD endpoints with user-scoped queries
 - [x] Summary endpoint returns live stats (total, healthy, needs attention)
 - [x] Sensor data model with plantId and userId tracking
-- [x] Plant lookup from external Perenual API
+- [x] Wikipedia plant lookup for names, images, and general information with article and image license attribution
+- [x] Queue Perenual care-data enrichment after plant collection add, with user clarification for uncertain matches
 - [x] Mark watered flow with update to wateringSchedule
 - [x] Collection refresh event ('plant-collection-updated') dispatched on mutations
 

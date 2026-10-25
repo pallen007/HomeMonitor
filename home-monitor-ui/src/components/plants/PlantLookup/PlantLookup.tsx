@@ -1,30 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Button, CardGroup, Col, Form, Row } from 'react-bootstrap';
 import { addPlantToCollection, DEMO_USER_ID, notifyCollectionUpdated } from '../../../service/db-ops/plant-ops';
-import { plantSearch } from '../../../service/search/plant-search';
-import { SearchOptions } from '../../../service/utils/types';
+import { wikipediaPlantSearch } from '../../../service/search/plant-search';
 import Plant from '../plant/plant';
 import { PlantProps } from '../Types/types';
 
 const RESULTS_PER_PAGE = 10;
 
 const PlantLookup: React.FC = () => {
-    const [filters, setFilters] = useState<SearchOptions>({
-        query: '',
-        order: 'asc',
-        // // Commenting out default filters, since they are limiting results too much.
-        // edible: null,
-        // poisonous: null,
-        // cycle: 'annual',
-        // watering: 'average',
-        // sunlight: 'full_sun',
-        // indoor: null,
-        // hardiness: 1,
-    });
+    const [query, setQuery] = useState('');
     const [plants, setPlants] = useState<PlantProps[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState<boolean>(false);
     const [searchError, setSearchError] = useState<string | null>(null);
+    const [addError, setAddError] = useState<string | null>(null);
     const pageCount = Math.ceil(plants.length / RESULTS_PER_PAGE);
     const visiblePlants = plants.slice(
         (currentPage - 1) * RESULTS_PER_PAGE,
@@ -36,11 +25,7 @@ const PlantLookup: React.FC = () => {
     }, [pageCount]);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-        setFilters((prevFilters) => ({
-            ...prevFilters,
-            [name]: value,
-        }));
+        setQuery(e.target.value);
     };
 
     const executeSearch = async (event?: React.FormEvent<HTMLFormElement>) => {
@@ -49,7 +34,7 @@ const PlantLookup: React.FC = () => {
         setSearchError(null);
         setCurrentPage(1);
         try {
-            const results: PlantProps[] = (await plantSearch(filters)) || [];
+            const results: PlantProps[] = await wikipediaPlantSearch(query);
             setPlants(results);
         } catch (error) {
             console.error('Error fetching plants:', error);
@@ -60,45 +45,43 @@ const PlantLookup: React.FC = () => {
     };
 
     const handleAddToCollection = async (plant: PlantProps) => {
-        const plantId = plant.perenualId ?? plant.id ?? Date.now();
+        setAddError(null);
+        const source = plant.wikipediaSource;
+        if (!source) {
+            setAddError('Wikipedia source details are missing. Search again before adding this plant.');
+            return;
+        }
+        const plantId = Date.now();
         const payload = {
             id: plantId,
-            perenualId: plantId,
             nickName: plant.localDetails?.nickName || plant.localDetails?.realName || 'My Plant',
             userId: DEMO_USER_ID,
             idealMoistureLevel: 50,
+            wikipediaSource: source,
             plantDetails: {
                 common_name: plant.localDetails?.realName || 'Unknown plant',
-                cycle: plant.localDetails?.cycle || 'annual',
-                watering: plant.localDetails?.wateringRate || 'average',
-                default_image: {
-                    regular_url: plant.localDetails?.plantImage || '',
-                    thumbnail: plant.localDetails?.plantThumbnail || '',
-                },
-            },
-            wateringSchedule: {
-                frequency: 3,
-                lastWatered: new Date().toISOString(),
-                nextWatering: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString(),
+                scientific_name: [],
+                other_name: [],
+                description: plant.localDetails?.plantDescription || '',
+                ...(source.imageUrl ? {
+                    default_image: {
+                        regular_url: source.imageUrl,
+                        thumbnail: source.imageUrl,
+                    },
+                } : {}),
             },
         };
 
-        const createdPlant = await addPlantToCollection(payload, DEMO_USER_ID);
-        if (createdPlant) {
-            notifyCollectionUpdated();
-            setPlants((currentPlants) =>
-                currentPlants.filter(
-                    (item) => (item.perenualId ?? item.id) !== (plant.perenualId ?? plant.id),
-                ),
-            );
+        try {
+            const createdPlant = await addPlantToCollection(payload, DEMO_USER_ID);
+            if (createdPlant) {
+                notifyCollectionUpdated();
+                setPlants((currentPlants) => currentPlants.filter((item) => item.id !== plant.id));
+            }
+        } catch (error) {
+            setAddError(error instanceof Error ? error.message : 'Unable to add this plant.');
         }
     };
-
-    // // This is causing the search to re-execute on every keystroke
-    // // Need to update the filters mechanism to not include the search query itself before re-enabling this
-    // useEffect(() => {
-    //     executeSearch();
-    // }, [filters]);
 
     return (
         <div style={{ padding: '20px' }}>
@@ -111,9 +94,9 @@ const PlantLookup: React.FC = () => {
                             <Form.Control
                                 type="text"
                                 name="query"
-                                value={filters.query}
+                                value={query}
                                 onChange={handleFilterChange}
-                                placeholder="Enter plant name"
+                                placeholder="Search Wikipedia for a plant"
                             />
                         </Form.Group>
                     </Col>
@@ -125,12 +108,17 @@ const PlantLookup: React.FC = () => {
             <div style={{ marginTop: '20px' }}>
                 <h2>Results</h2>
                 {searchError && <p role="alert">Unable to search for plants: {searchError}</p>}
+                {addError && <p role="alert">Unable to add this plant: {addError}</p>}
                 {!searchError && plants.length === 0 && !loading && <p>No plants found.</p>}
+                <p className="text-muted">
+                    Search results use Wikipedia article text under CC BY-SA 4.0. Images are shown only when
+                    Wikimedia Commons provides reusable license metadata.
+                </p>
                 <CardGroup style={{ display: 'flex', flexWrap: 'wrap' }}>
                     {visiblePlants.map((plant) => (
                         <Plant
                             {...plant}
-                            key={plant.perenualId ?? plant.id ?? `${plant.localDetails?.realName}-lookup`}
+                            key={plant.id ?? `${plant.localDetails?.realName}-lookup`}
                             onAddToCollection={handleAddToCollection}
                             isSearchResult={true}
                             owned={false}

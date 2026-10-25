@@ -2,14 +2,9 @@ import React, { useState } from 'react';
 import { Button, Card, ListGroup, ListGroupItem, Modal } from 'react-bootstrap';
 import './plant.css';
 import { PlantProps } from '../Types/types';
-import { detailSearch } from '../../../service/search/plant-search';
-import { PerenualPlantDetails } from '../../../service/utils/types';
 
 const Plant: React.FC<PlantProps> = (props: PlantProps) => {
   const [showDetails, setShowDetails] = useState(false);
-  const [details, setDetails] = useState<PerenualPlantDetails | null>(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
-  const [detailsError, setDetailsError] = useState<string | null>(null);
   const imageSources = Array.from(new Set([
     ...(props.localDetails?.plantImageFallbacks || []),
     props.localDetails?.plantImage,
@@ -21,7 +16,7 @@ const Plant: React.FC<PlantProps> = (props: PlantProps) => {
     : props.localDetails?.realName || 'Plant lookup';
 
   const subtitle = props.owned ? props.localDetails?.realName || 'Plant' : null;
-  const careText = props.localDetails?.careInstructions || 'No care instructions yet.';
+  const description = props.localDetails?.plantDescription;
   const image = imageSources[imageIndex];
 
   const handleAdd = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -31,27 +26,8 @@ const Plant: React.FC<PlantProps> = (props: PlantProps) => {
     }
   };
 
-  const handleShowDetails = async () => {
+  const handleShowDetails = () => {
     setShowDetails(true);
-    if (details || detailsLoading) {
-      return;
-    }
-
-    const plantId = props.perenualId ?? props.id;
-    if (!plantId) {
-      setDetailsError('Plant details are unavailable because this result has no plant ID.');
-      return;
-    }
-
-    setDetailsLoading(true);
-    setDetailsError(null);
-    try {
-      setDetails(await detailSearch(plantId));
-    } catch (error) {
-      setDetailsError(error instanceof Error ? error.message : 'Unable to load plant details.');
-    } finally {
-      setDetailsLoading(false);
-    }
   };
 
   const handleRemove = async () => {
@@ -83,7 +59,38 @@ const Plant: React.FC<PlantProps> = (props: PlantProps) => {
       <Card.Body>
         <Card.Title>{title}</Card.Title>
         {subtitle && <Card.Subtitle>{subtitle}</Card.Subtitle>}
-        <Card.Text>Care: {careText}</Card.Text>
+        {description && <Card.Text>{description}</Card.Text>}
+        {props.localDetails?.wikipediaArticleUrl && (
+          <small>
+            Text from Wikipedia contributors (
+            <a href={`${props.localDetails.wikipediaArticleUrl}?action=history`} target="_blank" rel="noreferrer">
+              history
+            </a>
+            ): <a href={props.localDetails.wikipediaArticleUrl} target="_blank" rel="noreferrer">
+              {props.localDetails.realName || 'article'}
+            </a>
+            {props.localDetails.wikipediaTextLicense && <> · licensed under <a
+              href={props.localDetails.wikipediaTextLicenseUrl}
+              target="_blank"
+              rel="noreferrer"
+            >{props.localDetails.wikipediaTextLicense}</a> (excerpt shortened)</>}
+          </small>
+        )}
+        {image && props.localDetails?.imageSourceUrl && (
+          <small className="d-block mt-2">
+            Image attribution: {props.localDetails.imageAttribution || 'Wikimedia Commons'}
+            {props.localDetails.imageSourceUrl && <> · <a
+              href={props.localDetails.imageSourceUrl}
+              target="_blank"
+              rel="noreferrer"
+            >image source</a></>}
+            {props.localDetails.imageLicense && <> · <a
+              href={props.localDetails.imageLicenseUrl}
+              target="_blank"
+              rel="noreferrer"
+            >{props.localDetails.imageLicense}</a></>}
+          </small>
+        )}
       </Card.Body>
       <ListGroup>
         {props.localDetails?.cycle && (
@@ -93,6 +100,17 @@ const Plant: React.FC<PlantProps> = (props: PlantProps) => {
           <ListGroupItem>
             Current Moisture Level: {props.sensorData?.moistureLevel ?? 'No data'}
           </ListGroupItem>
+        )}
+        {props.owned && props.localDetails?.wateringRate && (
+          <ListGroupItem>
+            Watering guidance: {props.localDetails.wateringRate} (Perenual; verify for your conditions)
+          </ListGroupItem>
+        )}
+        {props.owned && props.localDetails?.scientificName && (
+          <ListGroupItem>Scientific name: {props.localDetails.scientificName}</ListGroupItem>
+        )}
+        {props.owned && ['pending', 'processing'].includes(props.enrichmentStatus || '') && (
+          <ListGroupItem>Plant care data is being matched in the background.</ListGroupItem>
         )}
         {props.sensorData && (
           <ListGroupItem>
@@ -126,28 +144,37 @@ const Plant: React.FC<PlantProps> = (props: PlantProps) => {
     {props.isSearchResult && (
       <Modal show={showDetails} onHide={() => setShowDetails(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{details?.common_name || title}</Modal.Title>
+          <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {detailsLoading && <p>Loading plant details...</p>}
-          {detailsError && <p role="alert">{detailsError}</p>}
-          {details && (
-            <>
-              {details.default_image?.regular_url && (
-                <img
-                  src={details.default_image.regular_url}
-                  alt={details.common_name || title}
-                  className="img-fluid mb-3"
-                />
-              )}
-              {details.scientific_name?.length ? (
-                <p>Scientific name: {details.scientific_name.join(', ')}</p>
-              ) : null}
-              {details.description && <p>{details.description}</p>}
-              {details.cycle && <p>Cycle: {details.cycle}</p>}
-              {details.watering && <p>Watering: {details.watering}</p>}
-              {details.sunlight?.length ? <p>Sunlight: {details.sunlight.join(', ')}</p> : null}
-            </>
+          {image && <img src={image} alt={title} className="img-fluid mb-3" />}
+          {description && <p>{description}</p>}
+          <p>
+            General information only—not plant-care advice. Care information is added later when a
+            reliable species match is available.
+          </p>
+          {props.localDetails?.wikipediaArticleUrl && (
+            <p>
+              Text from Wikipedia contributors (
+              <a href={`${props.localDetails.wikipediaArticleUrl}?action=history`} target="_blank" rel="noreferrer">
+                history
+              </a>
+              ). Article: <a href={props.localDetails.wikipediaArticleUrl} target="_blank" rel="noreferrer">{title}</a>
+              {' '}· licensed under <a href={props.localDetails.wikipediaTextLicenseUrl} target="_blank" rel="noreferrer">
+                {props.localDetails.wikipediaTextLicense}
+              </a>. Excerpt shortened.
+            </p>
+          )}
+          {image && props.localDetails?.imageSourceUrl && (
+            <p>
+              Image by {props.localDetails.imageAttribution || 'Wikimedia Commons'};{' '}
+              <a href={props.localDetails.imageSourceUrl} target="_blank" rel="noreferrer">source</a>
+              {props.localDetails.imageLicense && <> · <a
+                href={props.localDetails.imageLicenseUrl}
+                target="_blank"
+                rel="noreferrer"
+              >{props.localDetails.imageLicense}</a></>}
+            </p>
           )}
         </Modal.Body>
       </Modal>

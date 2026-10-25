@@ -45,11 +45,47 @@ export const addPlantToCollection = async (plant: Record<string, any>, userId: s
             body: JSON.stringify(payload),
         });
         const createdPlant = await response.json();
+        if (!response.ok) {
+            throw new Error(`API request failed (${response.status}): ${createdPlant.error || response.statusText}`);
+        }
         notifyCollectionUpdated();
         return createdPlant;
     } catch (error) {
         console.error('Error creating plant:', error);
+        throw error;
     }
+};
+
+export const getEnrichmentTasks = async (userId: string = DEMO_USER_ID) => {
+    const response = await fetch(`/api/plants/enrichment-tasks/${encodeURIComponent(userId)}`);
+    const tasks = await response.json();
+    if (!response.ok) {
+        throw new Error(`API request failed (${response.status}): ${tasks.error || response.statusText}`);
+    }
+    if (!Array.isArray(tasks)) {
+        throw new Error('API returned invalid plant enrichment tasks');
+    }
+    return tasks;
+};
+
+export const resolveEnrichmentTask = async (
+    plantId: number,
+    userId: string = DEMO_USER_ID,
+    selection: { searchTerm?: string; selectedPerenualId?: number },
+) => {
+    const response = await fetch(
+        `/api/plants/enrichment-tasks/${encodeURIComponent(userId)}/${plantId}/resolve`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(selection),
+        },
+    );
+    const result = await response.json();
+    if (!response.ok) {
+        throw new Error(`API request failed (${response.status}): ${result.error || response.statusText}`);
+    }
+    return result;
 };
 
 export const deletePlantFromCollection = async (plantId: number, userId: string = DEMO_USER_ID) => {

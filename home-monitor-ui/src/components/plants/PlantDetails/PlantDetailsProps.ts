@@ -1,9 +1,7 @@
-import { PerenualPlantDetails } from "../../../service/utils/types"
 import { LocalPlantDetails } from "../Types/types"
 
-export interface PlantDetailsProps {
-    localDetails: LocalPlantDetails
-    plantDetails: PerenualPlantDetails
+export interface PlantDetailsProps extends LocalPlantDetails {
     isSearchResult: boolean
-    }
+    idealMoistureLevel?: number
+}
     

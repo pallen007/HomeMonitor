@@ -1,42 +1,16 @@
 import express from 'express';
-import { existsSync, readFileSync } from 'node:fs';
-import path from 'node:path';
+import { fetchPerenual, getPerenualApiKey } from '../services/perenual-client';
 
 const router: any = (express as any).Router();
-const PERENUAL_BASE_URL = 'https://perenual.com';
-
-const getApiKey = () => {
-    if (process.env.PERENUAL_API_KEY) {
-        return process.env.PERENUAL_API_KEY;
-    }
-
-    const credentialsPath = path.resolve(__dirname, '../../credentials.json');
-    if (!existsSync(credentialsPath)) {
-        return undefined;
-    }
-
-    try {
-        const credentials = JSON.parse(readFileSync(credentialsPath, 'utf8')) as { perenualAPIKey?: string };
-        return credentials.perenualAPIKey?.trim() || undefined;
-    } catch (error) {
-        console.error('Unable to read Perenual credentials file:', error);
-        return undefined;
-    }
-};
 
 const forwardRequest = async (path: string, query: URLSearchParams, res: any) => {
-    const apiKey = getApiKey();
-    if (!apiKey) {
+    if (!getPerenualApiKey()) {
         return res.status(503).json({ error: 'Perenual API is not configured' });
     }
 
-    query.set('key', apiKey);
-    const url = new URL(path, PERENUAL_BASE_URL + '/');
-    url.search = query.toString();
-
     let response: Response;
     try {
-        response = await fetch(url);
+        response = await fetchPerenual(path, query);
     } catch (error) {
         console.error('Unable to connect to Perenual API:', error);
         return res.status(502).json({ error: 'Perenual request failed' });

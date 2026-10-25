@@ -28,6 +28,7 @@ const makeQuery = (result: unknown) => {
     const query = {
         sort: vi.fn(() => query),
         limit: vi.fn(() => query),
+        select: vi.fn(() => query),
         then: (resolve: (value: unknown) => unknown) => Promise.resolve(result).then(resolve)
     };
 
@@ -63,6 +64,70 @@ describe('Plant API', () => {
         expect(response.body.nickName).toBe(testPlant.nickName);
         expect(response.body.userId).toBe(testPlant.userId);
         expect(Plant.create).toHaveBeenCalledWith(testPlant);
+    });
+
+    test('POST /api/plants queues Perenual enrichment for a Wikipedia-sourced plant', async () => {
+        vi.mocked(Plant.create).mockImplementation(async (data) => data as never);
+        const wikipediaSource = {
+            pageId: 123,
+            title: 'Monstera deliciosa',
+            articleUrl: 'https://en.wikipedia.org/wiki/Monstera_deliciosa',
+            summary: 'A tropical plant.',
+            textLicense: 'CC BY-SA 4.0',
+            textLicenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+        };
+
+        const response = await request(app)
+            .post('/api/plants')
+            .send({
+                ...testPlant,
+                id: 2,
+                wikipediaSource,
+                plantDetails: { common_name: 'Monstera deliciosa', scientific_name: [] },
+            });
+
+        expect(response.status).toBe(201);
+        expect(Plant.create).toHaveBeenCalledWith(expect.objectContaining({
+            wikipediaSource,
+            enrichment: expect.objectContaining({
+                status: 'pending',
+                searchTerm: 'Monstera deliciosa',
+            }),
+        }));
+    });
+
+    test('POST /api/plants/enrichment-tasks re-queues the selected species for the user', async () => {
+        const plant = {
+            _id: 'database-id',
+            userId: 'user123',
+            id: 17,
+            wikipediaSource: { title: 'Monstera deliciosa' },
+            enrichment: {
+                status: 'needs_user_action',
+                searchTerm: 'Monstera deliciosa',
+                candidates: [{ id: 42, score: 1 }],
+            },
+        };
+        vi.mocked(Plant.findOne).mockResolvedValue(plant as never);
+        vi.mocked(Plant.findOneAndUpdate).mockResolvedValue(plant as never);
+
+        const response = await request(app)
+            .post('/api/plants/enrichment-tasks/user123/17/resolve')
+            .send({ selectedPerenualId: 42 });
+
+        expect(response.status).toBe(200);
+        expect(response.body.queued).toBe(true);
+        expect(Plant.findOneAndUpdate).toHaveBeenCalledWith(
+            { _id: 'database-id', userId: 'user123', 'enrichment.status': 'needs_user_action' },
+            expect.objectContaining({
+                $set: expect.objectContaining({
+                    'enrichment.status': 'pending',
+                    'enrichment.selectedPerenualId': 42,
+                }),
+                $unset: expect.any(Object),
+            }),
+            { new: true },
+        );
     });
 
     test('PUT /api/plants/:userId/:id should create or update a plant for a user', async () => {

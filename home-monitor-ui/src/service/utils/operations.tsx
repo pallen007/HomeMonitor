@@ -1,30 +1,28 @@
-import { PerenualPlantDetails, PlantSearchResult } from "./types";
-import { LocalPlantDetails, PlantProps } from "../../Components/plants/Types/types";
+import { WikipediaPlantResult } from "./types";
+import { LocalPlantDetails, PlantProps } from "../../components/plants/Types/types";
 
-export const searchResultsToPlantData = (results: PlantSearchResult[]) => {
-    return results.map((result: PlantSearchResult) => {
+export const wikipediaResultsToPlantData = (results: WikipediaPlantResult[]) => {
+    return results.map((result: WikipediaPlantResult) => {
         return {
-            perenualId: result.id,
+            id: result.pageId,
             owned: false,
             isSearchResult: true,
             localDetails: {
-                perenualId: result.id,
-                plantImage: result.default_image?.regular_url
-                    || result.default_image?.medium_url
-                    || result.default_image?.small_url
-                    || result.default_image?.thumbnail
-                    || result.default_image?.original_url,
-                plantImageFallbacks: [
-                    result.default_image?.regular_url,
-                    result.default_image?.medium_url,
-                    result.default_image?.small_url,
-                    result.default_image?.thumbnail,
-                    result.default_image?.original_url,
-                ].filter((url): url is string => Boolean(url)),
-                plantThumbnail: result.default_image?.thumbnail,
-                realName: result.common_name
+                plantImage: result.imageUrl,
+                plantImageFallbacks: result.imageUrl ? [result.imageUrl] : [],
+                plantThumbnail: result.imageUrl,
+                realName: result.title,
+                plantDescription: result.summary,
+                wikipediaPageId: result.pageId,
+                wikipediaArticleUrl: result.articleUrl,
+                wikipediaTextLicense: result.textLicense,
+                wikipediaTextLicenseUrl: result.textLicenseUrl,
+                imageSourceUrl: result.imageSourceUrl,
+                imageAttribution: result.imageAttribution,
+                imageLicense: result.imageLicense,
+                imageLicenseUrl: result.imageLicenseUrl,
             } as LocalPlantDetails,
-            perenualDetails: {} as PerenualPlantDetails
+            wikipediaSource: result,
         } as PlantProps
     })
 }

@@ -158,3 +158,17 @@ export type PerenualPlantDetails = {
         unit?: string
     }
 }
+
+export type WikipediaPlantResult = {
+    pageId: number
+    title: string
+    articleUrl: string
+    summary: string
+    imageUrl?: string
+    imageSourceUrl?: string
+    imageAttribution?: string
+    imageLicense?: string
+    imageLicenseUrl?: string
+    textLicense: string
+    textLicenseUrl: string
+}
