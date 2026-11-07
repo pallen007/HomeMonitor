@@ -32,6 +32,7 @@ services:
       PORT: 5000
       MONGODB_URI: ${MONGODB_URI}
       PERENUAL_API_KEY: ${PERENUAL_API_KEY}
+      WIKIPEDIA_CONTACT_EMAIL: ${WIKIPEDIA_CONTACT_EMAIL:-}
     command:
       - /bin/sh
       - -c

@@ -1,39 +1,57 @@
 import os
-import network
+import wifi
 import time
+import board
+import digitalio
 
-# Enter your Wi-Fi credentials
+# Status LED
+led = digitalio.DigitalInOut(board.LED)
+led.direction = digitalio.Direction.OUTPUT
+
+# Wi-Fi credentials from settings.toml
 SSID = os.getenv("SSID")
 PASSWORD = os.getenv("PASSWORD")
 
+
 def log_message(message):
     try:
-        # Open file in append mode
         with open("/log.txt", "a") as f:
             timestamp = time.monotonic()
             f.write(f"[{timestamp:.2f}] {message}\n")
     except OSError as e:
-        print("Failed to write log. Is the board in read-only mode?", e)
+        print("Failed to write log:", e)
 
-# Initialize Wi-Fi in Station mode (client mode)
-wlan = network.WLAN(network.STA_IF)
-wlan.active(True)
-wlan.connect(SSID, PASSWORD)
 
-# Wait for connection with a timeout/retry loop
-max_wait = 5
-while max_wait > 0:
-    if wlan.status() < 0 or wlan.status() >= 3:
+# Attempt connection with retries
+max_attempts = 5
+connected = False
+
+for attempt in range(max_attempts):
+    try:
+        log_message(f"Connecting to Wi-Fi (attempt {attempt + 1})...")
+
+        led.value = True
+        wifi.radio.connect(SSID, PASSWORD)
+
+        connected = True
         break
-    max_wait -= 1
-    log_message("Waiting for connection...")
-    time.sleep(5)
 
-# Handle connection result
-if wlan.status() != 3:
-    raise RuntimeError('network connection failed')
-else:
-    log_message("Connected to Wi-Fi!")
-    status = wlan.ifconfig()
-    log_message(f"IP address: {status[0]}")
-    # Report sensor readings and timestamp
+    except Exception as e:
+        log_message(f"Connection failed: {e}")
+
+        led.value = False
+        time.sleep(5)
+
+if not connected:
+    led.value = False
+    raise RuntimeError("Network connection failed")
+
+# Connected successfully
+ip_address = str(wifi.radio.ipv4_address)
+
+log_message("Connected to Wi-Fi!")
+log_message(f"IP address: {ip_address}")
+
+led.value = True
+
+# Report sensor readings and timestamp
