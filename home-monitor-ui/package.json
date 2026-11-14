@@ -1,7 +1,10 @@
 {
   "name": "home-monitor-ui",
   "version": "0.1.0",
-  "repository": {"type": "git", "url": "https://github.com/pallen007/HomeMonitor.git"},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pallen007/HomeMonitor.git"
+  },
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^6.6.3",
@@ -12,7 +15,7 @@
     "react-bootstrap": "^2.0.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
-    "react-router-dom": "^6.30.0",
+    "react-router-dom": "^7.18.5",
     "styled-components": "^6.1.15",
     "web-vitals": "^1.1.2"
   },
@@ -51,10 +54,10 @@
     "@types/react-router-dom": "^5.3.3",
     "@typescript-eslint/eslint-plugin": "^8.26.1",
     "@typescript-eslint/parser": "^8.26.1",
+    "@vitejs/plugin-react": "^4.4.1",
     "eslint": "^9.22.0",
     "eslint-plugin-react": "^7.37.4",
     "globals": "^16.0.0",
-    "@vitejs/plugin-react": "^4.4.1",
     "jsdom": "^26.0.0",
     "typescript-eslint": "^8.26.1",
     "vite": "^6.4.5",
